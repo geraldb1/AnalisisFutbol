@@ -39,9 +39,6 @@ def download_data():
   
 # ─────────────────────── Consolidación de datos ──────────────────────────    
 def cons_data():
-    """
-    Lee los archivos CSV descargados, los concatena en un solo DataFrame.
-    """
     os.makedirs(ruta_processed, exist_ok=True)
     archivos = sorted(ruta_raw.glob("SP1_*.csv"))
     df_all = pd.DataFrame()
@@ -59,9 +56,9 @@ def cons_data():
             with open(archivo, "r", encoding="latin-1") as f:
                 contenido = f.read()
         lineas = contenido.splitlines()
-        lineas_limpias = [linea.rstrip(',') for linea in lineas if linea.strip()]
+        lineas_limpias = [linea.rstrip(',') for linea in lineas]
         texto_limpio = "\n".join(lineas_limpias)
-        df_temp = pd.read_csv(StringIO(texto_limpio), sep=",", on_bad_lines="skip")
+        df_temp = pd.read_csv(StringIO(texto_limpio), sep=",")
         df_temp["temporada"] = campaña
         df_temp.drop(columns=['Div'], inplace=True, errors='ignore')
         df_all = pd.concat([df_all, df_temp], ignore_index=True)
