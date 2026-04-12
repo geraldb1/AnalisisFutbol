@@ -128,7 +128,7 @@ Se prioriza el **equilibrio entre clases** sobre el accuracy global. Es el únic
 * [X] Exportación del modelo (.pkl)
 * [X] Modularización del pipeline (`src/`)
 * [X] Tests (pytest)
-* [ ] API de predicción (FastAPI)
+* [X] API de predicción (FastAPI)
 * [ ] Containerización (Docker)
 * [ ] CI/CD (GitHub Actions)
 
