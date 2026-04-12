@@ -13,7 +13,7 @@ SCORE_SEASON = VAL_SEASON
 
 def load_data(filename):
     """
-    Carga el dataset procesado desde la carpeta processed.
+    Carga el dataset procesado desde la carpeta processed
     """
     df = pd.read_csv(ruta_processed / filename)
     print(f"Datos cargados: {df.shape}")
