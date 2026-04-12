@@ -53,9 +53,15 @@ def cons_data():
             continue
         print(f"Procesando temporada: {archivo.name}")
         try:
-            df_temp = pd.read_csv(archivo, sep=",", encoding="utf-8", on_bad_lines="skip")
-        except Exception:
-            df_temp = pd.read_csv(archivo, sep=",", encoding="latin-1", on_bad_lines="skip")
+            with open(archivo, "r", encoding="utf-8") as f:
+                contenido = f.read()
+        except UnicodeDecodeError:
+            with open(archivo, "r", encoding="latin-1") as f:
+                contenido = f.read()
+        lineas = contenido.splitlines()
+        lineas_limpias = [linea.rstrip(',') for linea in lineas if linea.strip()]
+        texto_limpio = "\n".join(lineas_limpias)
+        df_temp = pd.read_csv(StringIO(texto_limpio), sep=",", on_bad_lines="skip")
         df_temp["temporada"] = campaña
         df_temp.drop(columns=['Div'], inplace=True, errors='ignore')
         df_all = pd.concat([df_all, df_temp], ignore_index=True)
