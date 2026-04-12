@@ -40,7 +40,7 @@ def download_data():
 # ─────────────────────── Consolidación de datos ──────────────────────────    
 def cons_data():
     """
-    Lee los archivos CSV descargados, los concatena en un solo DataFrame y lo guarda en la carpeta reprocess.
+    Lee los archivos CSV descargados, los concatena en un solo DataFrame.
     """
     os.makedirs(ruta_processed, exist_ok=True)
     archivos = sorted(ruta_raw.glob("SP1_*.csv"))
@@ -48,23 +48,19 @@ def cons_data():
     print(f"Consolidando datos de {len(archivos)} temporadas...")
     
     for archivo in archivos:
-        print(f"Procesando temporada: {archivo.name}")
         campaña = archivo.stem.split("_")[1]
+        if campaña in FILTRO_TEMPORADAS:
+            continue
+        print(f"Procesando temporada: {archivo.name}")
         try:
-            with open(archivo, "r", encoding="utf-8") as f:
-                contenido = f.read()
-        except UnicodeDecodeError:
-            with open(archivo, "r", encoding="latin-1") as f:
-                contenido = f.read()
-        lineas = contenido.splitlines()
-        lineas_limpias = [linea.rstrip(',') for linea in lineas if linea.strip()]   
-        texto_limpio = "\n".join(lineas_limpias)
-        df_temp = pd.read_csv(StringIO(texto_limpio), sep=",", quoting=3)
+            df_temp = pd.read_csv(archivo, sep=",", encoding="utf-8", on_bad_lines="skip")
+        except Exception:
+            df_temp = pd.read_csv(archivo, sep=",", encoding="latin-1", on_bad_lines="skip")
         df_temp["temporada"] = campaña
-        df_temp.drop(columns=['Div'], inplace=True, errors='ignore')  # luego elimina Div
-        df_all = pd.concat([df_all, df_temp], ignore_index=True)  # finalmente concatena
+        df_temp.drop(columns=['Div'], inplace=True, errors='ignore')
+        df_all = pd.concat([df_all, df_temp], ignore_index=True)
         print(f"Total de datos cargados {campaña}: {len(df_temp)}")
-        
+    
     df_all.to_csv(ruta_processed / "data_consolidated.csv", index=False)
     return df_all
 
