@@ -54,7 +54,7 @@ def cons_data():
             with open(archivo, "r", encoding="latin-1") as f:
                 contenido = f.read()
         lineas = contenido.splitlines()
-        lineas_limpias = [linea.rstrip(',') for linea in lineas]
+        lineas_limpias = [linea.rstrip(',') for linea in lineas if linea.strip()]
         texto_limpio = "\n".join(lineas_limpias)
         df_temp = pd.read_csv(StringIO(texto_limpio),sep = ",")
         df_temp["temporada"] = campaña
