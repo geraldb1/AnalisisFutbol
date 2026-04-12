@@ -25,7 +25,7 @@ def download_data():
         try:
             response = requests.get(url)
             if response.status_code == 200:
-                with open(archivo, "wb", encoding="utf-8") as f:
+                with open(archivo, "wb") as f:
                     f.write(response.content)
                 print(f"Datos de la temporada {temporada} descargados y guardados en {archivo}.")
 
