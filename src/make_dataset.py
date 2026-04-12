@@ -15,6 +15,9 @@ def download_data():
     """
     os.makedirs(ruta_raw, exist_ok=True)
     for temporada in TEMPORADAS:
+        if temporada in FILTRO_TEMPORADAS:
+            print(f"Temporada {temporada} excluida (sin stats completas).")
+            continue
         archivo = ruta_raw / f"SP1_{temporada}.csv"
         csv = f"SP1_{temporada}.csv"
         if archivo.exists() and temporada != TEMPORADAS[-1]:
@@ -54,7 +57,7 @@ def cons_data():
             with open(archivo, "r", encoding="latin-1") as f:
                 contenido = f.read()
         lineas = contenido.splitlines()
-        lineas_limpias = [linea.rstrip(',') for linea in lineas if linea.strip()]
+        lineas_limpias = [linea.rstrip(',') for linea in lineas if linea.strip()]   
         texto_limpio = "\n".join(lineas_limpias)
         df_temp = pd.read_csv(StringIO(texto_limpio),sep = ",")
         df_temp["temporada"] = campaña
