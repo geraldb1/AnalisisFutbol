@@ -126,7 +126,7 @@ Se prioriza el **equilibrio entre clases** sobre el accuracy global. Es el únic
 * [X] Feature Engineering (rolling averages)
 * [X] Modelamiento (DT → RF → LightGBM → LightGBM balanced)
 * [X] Exportación del modelo (.pkl)
-* [ ] Modularización del pipeline (`src/`)
+* [X] Modularización del pipeline (`src/`)
 * [ ] Tests (pytest)
 * [ ] API de predicción (FastAPI)
 * [ ] Containerización (Docker)
