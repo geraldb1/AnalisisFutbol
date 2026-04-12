@@ -127,7 +127,7 @@ Se prioriza el **equilibrio entre clases** sobre el accuracy global. Es el únic
 * [X] Modelamiento (DT → RF → LightGBM → LightGBM balanced)
 * [X] Exportación del modelo (.pkl)
 * [X] Modularización del pipeline (`src/`)
-* [ ] Tests (pytest)
+* [X] Tests (pytest)
 * [ ] API de predicción (FastAPI)
 * [ ] Containerización (Docker)
 * [ ] CI/CD (GitHub Actions)
