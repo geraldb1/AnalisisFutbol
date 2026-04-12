@@ -2,10 +2,11 @@ from fastapi import FastAPI
 import joblib
 from pathlib import Path
 from pydantic import BaseModel
-from src.config import MAP_INVERSO
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "model" / "lgbm_balanced.pkl"
 model = joblib.load(MODEL_PATH)
+
+MAP_INVERSO = {0: "H", 1: "D", 2: "A"}
 
 app = FastAPI(title="Football Prediction API")
 

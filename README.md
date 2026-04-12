@@ -129,7 +129,7 @@ Se prioriza el **equilibrio entre clases** sobre el accuracy global. Es el únic
 * [X] Modularización del pipeline (`src/`)
 * [X] Tests (pytest)
 * [X] API de predicción (FastAPI)
-* [ ] Containerización (Docker)
+* [X] Containerización (Docker)
 * [ ] CI/CD (GitHub Actions)
 
 ## 📄 Licencia
