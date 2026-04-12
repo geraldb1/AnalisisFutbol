@@ -17,7 +17,7 @@ def download_data():
     for temporada in TEMPORADAS:
         archivo = ruta_raw / f"SP1_{temporada}.csv"
         csv = f"SP1_{temporada}.csv"
-        if archivo.exists():
+        if archivo.exists() and temporada != TEMPORADAS[-1]:
             print(f"Archivo {csv} ya existe, saltando descarga.")
             continue
         url = f"http://www.football-data.co.uk/mmz4281/{temporada}/SP1.csv"
