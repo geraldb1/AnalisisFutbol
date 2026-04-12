@@ -8,4 +8,4 @@ response = requests.get(url)
 with open(ruta, "w", encoding="utf-8") as f:
     f.write(response.text)
 
-print("✅ notes.txt guardado")
+print("✅ notes.txt guardado.")
