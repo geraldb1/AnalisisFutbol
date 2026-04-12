@@ -1,20 +1,25 @@
-# Análisis Fútbol - Predicción La Liga
+# ⚽ Football Prediction — La Liga
 
-Proyecto end-to-end de Machine Learning para predecir resultados de partidos de La Liga española (Home / Draw / Away), abarcando desde la ingesta de datos hasta el despliegue del modelo.
+Proyecto end-to-end de Machine Learning para predecir resultados de partidos de La Liga española (Home / Draw / Away), abarcando desde la ingesta de datos hasta el despliegue del modelo con API y Docker.
 
-## Descripción del Problema
+## 📋 Descripción del Problema
 
-Predecir el resultado de un partido de fútbol es un problema de clasificación multiclase con un desafío conocido en la industria:  **los empates son casi impredecibles** . Incluso las casas de apuestas como Bet365, con modelos sofisticados y millones en datos, obtienen 0% de recall en empates — simplemente nunca los predicen.
+Predecir el resultado de un partido de fútbol es un problema de clasificación multiclase con un desafío conocido en la industria: **los empates son casi impredecibles**. Incluso las casas de apuestas como Bet365, con modelos sofisticados y millones en datos, obtienen 0% de recall en empates — simplemente nunca los predicen.
 
 Este proyecto aborda ese desafío utilizando ~25 temporadas de datos históricos de La Liga (2000-2026), con un enfoque especial en lograr predicciones balanceadas entre las tres clases.
 
-## Arquitectura del Proyecto
+## 🏗️ Arquitectura del Proyecto
 
 ```
 Football_Prediction/
-├── Data/
-│   ├── raw/                  ← 26 CSVs de football-data.co.uk
-│   └── processed/            ← data_modeling.csv (7,717 partidos × 25 features)
+├── .github/workflows/
+│   └── ci.yml                 ← CI/CD con GitHub Actions
+├── api/
+│   └── main.py                ← API de predicción (FastAPI)
+├── data/
+│   ├── raw/                   ← 26 CSVs de football-data.co.uk
+│   ├── processed/             ← data_modeling.csv (7,717 partidos × 25 features)
+│   └── scores/                ← Predicciones exportadas
 ├── SQL/
 │   └── 01_creacion_tablas.sql ← Star schema (dim_equipo, dim_fecha, fact_partido)
 ├── Script/
@@ -26,22 +31,32 @@ Football_Prediction/
 ├── model/
 │   └── lgbm_balanced.pkl      ← Modelo final exportado
 ├── src/                       ← Pipeline modularizado (producción)
+│   ├── config.py              ← Configuración centralizada
+│   ├── make_dataset.py        ← Descarga + limpieza + feature engineering
+│   ├── train.py               ← Entrenamiento del modelo
+│   ├── evaluate.py            ← Evaluación con métricas
+│   └── predict.py             ← Generación de predicciones
+├── test/                      ← Tests automatizados (pytest)
+│   ├── test_make_dataset.py
+│   └── test_model.py
+├── Dockerfile                 ← Containerización de la API
+├── requirements.txt
 └── README.md
 ```
 
-## Datos
+## 📊 Datos
 
 **Fuente:** [football-data.co.uk](https://www.football-data.co.uk/spainm.php) — 26 archivos CSV con estadísticas de partidos de La Liga desde la temporada 2000/01 hasta 2025/26.
 
 **Base de datos:** SQL Server Express con modelo estrella:
 
-* `dim_equipo` — 52 equipos históricos
-* `dim_fecha` — fechas con atributos temporales
-* `fact_partido` — partidos con estadísticas y cuotas
+- `dim_equipo` — 52 equipos históricos
+- `dim_fecha` — fechas con atributos temporales
+- `fact_partido` — partidos con estadísticas y cuotas
 
 **Dataset final:** 7,717 partidos con 25 features (temporadas 2005/06 a 2025/26, filtrando las primeras 5 por falta de estadísticas completas).
 
-## Feature Engineering
+## ⚙️ Feature Engineering
 
 El enfoque central es capturar el **momentum reciente** de cada equipo, no su identidad:
 
@@ -59,23 +74,23 @@ El enfoque central es capturar el **momentum reciente** de cada equipo, no su id
 
 **Decisiones de diseño:**
 
-* Los rolling averages son **continuos entre temporadas** (no se resetean) para preservar la forma del equipo
-* Los nombres de equipo se **excluyen como features** — los equipos que ascienden/descienden no tendrían historial, y el rolling average ya codifica la forma
-* Solo se retienen las cuotas de **B365** (las demás casas tienen 40-93% de valores nulos)
+- Los rolling averages son **continuos entre temporadas** (no se resetean) para preservar la forma del equipo
+- Los nombres de equipo se **excluyen como features** — los equipos que ascienden/descienden no tendrían historial, y el rolling average ya codifica la forma
+- Solo se retienen las cuotas de **B365** (las demás casas tienen 40-93% de valores nulos)
 
-## Metodología
+## 🧪 Metodología
 
 **Split temporal estricto** (sin data leakage):
 
-* **Train:** Temporadas 2005/06 a 2023/24
-* **Test:** Temporada 2024/25 (380 partidos)
-* **Validation:** Temporada 2025/26 (265 partidos, temporada en curso)
+- **Train:** Temporadas 2005/06 a 2023/24
+- **Test:** Temporada 2024/25 (380 partidos)
+- **Validation:** Temporada 2025/26 (265 partidos, temporada en curso)
 
 **Cross-validation:** TimeSeriesSplit con 5 folds sobre el set de entrenamiento.
 
 **Búsqueda de hiperparámetros:** GridSearchCV para todos los modelos.
 
-## Resultados
+## 📈 Resultados
 
 ### Comparación de Modelos (Test — Temporada 2024/25)
 
@@ -93,17 +108,11 @@ Se prioriza el **equilibrio entre clases** sobre el accuracy global. Es el únic
 
 **Validación (temporada 2025/26):**
 
-* Accuracy: 50.6%
-* Draw recall: 0.44 (mejoró vs test)
-* Sin overfitting — generalización consistente
+- Accuracy: 50.6%
+- Draw recall: 0.44 (mejoró vs test)
+- Sin overfitting — generalización consistente
 
-### Distribución de clases
-
-* Home (H): ~47%
-* Away (A): ~28%
-* Draw (D): ~25%
-
-## Hallazgos Clave
+## 💡 Hallazgos Clave
 
 1. **Techo natural de predicción:** Todos los modelos sin balanceo orbitan entre 54-56%, apenas superando a B365. Las features actuales tienen un límite natural.
 2. **El Draw es un problema del dominio, no del modelo:** Ni B365 ni ningún modelo estándar predice empates. Se requiere penalización explícita (`class_weight='balanced'`) para lograrlo, a costa de accuracy global.
@@ -111,26 +120,66 @@ Se prioriza el **equilibrio entre clases** sobre el accuracy global. Es el únic
 4. **Promediar porcentajes entre temporadas es un error estadístico:** Las proporciones deben calcularse como proporción ponderada, no como promedio de promedios (relacionado con la Paradoja de Simpson).
 5. **Los H2H (head-to-head) no aportan:** Con solo ~2 enfrentamientos por temporada por pareja de equipos, los datos son demasiado escasos. El rolling form general es más robusto.
 
-## Stack Tecnológico
+## 🚀 Ejecución
 
-* **Python** — pandas, numpy, scikit-learn, LightGBM, matplotlib, seaborn
-* **SQL Server Express** — modelo estrella para almacenamiento y EDA
-* **Jupyter Notebooks** — desarrollo y exploración
-* **Git/GitHub** — control de versiones
+### Pipeline de datos y modelado
 
-## Roadmap
+```bash
+pip install -r requirements.txt
 
-* [X] Ingesta de datos (scraping football-data.co.uk)
-* [X] ETL y carga a SQL Server (star schema)
-* [X] EDA
-* [X] Feature Engineering (rolling averages)
-* [X] Modelamiento (DT → RF → LightGBM → LightGBM balanced)
-* [X] Exportación del modelo (.pkl)
-* [X] Modularización del pipeline (`src/`)
-* [X] Tests (pytest)
-* [X] API de predicción (FastAPI)
-* [X] Containerización (Docker)
-* [ ] CI/CD (GitHub Actions)
+python -m src.make_dataset    # Descarga + limpieza + feature engineering
+python -m src.train           # Entrenar modelo
+python -m src.evaluate        # Evaluar en test y validation
+python -m src.predict         # Generar predicciones
+```
+
+### API de predicción
+
+```bash
+python -m uvicorn api.main:app --reload
+```
+
+La documentación interactiva estará en `http://localhost:8000/docs`
+
+### Docker
+
+```bash
+docker build -t football-prediction-api .
+docker run -p 8000:8000 football-prediction-api
+```
+
+La API estará disponible en `http://localhost:8000/docs`
+
+### Tests
+
+```bash
+pytest
+```
+
+## 🛠️ Stack Tecnológico
+
+- **Python** — pandas, numpy, scikit-learn, LightGBM, matplotlib, seaborn
+- **SQL Server Express** — modelo estrella para almacenamiento y EDA
+- **FastAPI** — API de predicción
+- **Docker** — containerización de la API
+- **GitHub Actions** — CI/CD (tests automatizados en cada push)
+- **pytest** — testing automatizado
+- **Jupyter Notebooks** — desarrollo y exploración
+- **Git/GitHub** — control de versiones
+
+## 🗺️ Roadmap
+
+- [X] Ingesta de datos (scraping football-data.co.uk)
+- [X] ETL y carga a SQL Server (star schema)
+- [X] EDA
+- [X] Feature Engineering (rolling averages)
+- [X] Modelamiento (DT → RF → LightGBM → LightGBM balanced)
+- [X] Exportación del modelo (.pkl)
+- [X] Modularización del pipeline (`src/`)
+- [X] Tests (pytest)
+- [X] API de predicción (FastAPI)
+- [X] Containerización (Docker)
+- [X] CI/CD (GitHub Actions)
 
 ## 📄 Licencia
 
