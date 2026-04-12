@@ -59,7 +59,7 @@ def cons_data():
         lineas = contenido.splitlines()
         lineas_limpias = [linea.rstrip(',') for linea in lineas if linea.strip()]   
         texto_limpio = "\n".join(lineas_limpias)
-        df_temp = pd.read_csv(StringIO(texto_limpio),sep = ",")
+        df_temp = pd.read_csv(StringIO(texto_limpio), sep=",", engine="python")
         df_temp["temporada"] = campaña
         df_temp.drop(columns=['Div'], inplace=True, errors='ignore')  # luego elimina Div
         df_all = pd.concat([df_all, df_temp], ignore_index=True)  # finalmente concatena
